@@ -67,3 +67,36 @@ th, td {
 .total-earnings-card span {
     font-size: 20px;
 }
+
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 10px;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 8px;
+    }
+
+    .fa-house {
+        font-size: 25px;
+        bottom: 15px;
+        right: 15px;
+        padding: 8px;
+    }
+
+    .total-earnings-card {
+        font-size: 13px;
+        padding: 10px;
+        gap: 3px;
+        max-width: 250px;
+    }
+
+    .total-earnings-card span {
+        font-size: 18px;
+    }
+}
