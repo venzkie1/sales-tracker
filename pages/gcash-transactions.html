@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gcash Transactions</title>
+    <link rel="stylesheet" href="../css/gcash-transactions.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" href="../assets/images/wallet.png">
+</head>
+<body>
+    <div class="container">
+        <h2>All GCash Transactions</h2>
+        <label for="filterDate">Filter by Date:</label>
+        <input type="date" id="filterDate">
+        <button onclick="filterTransactions()">Filter</button>
+        <button onclick="resetFilters()">Reset</button>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Amount</th>
+                        <th>Fee</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="gcashTransactionsTable"></tbody>
+            </table>
+        </div>
+        <div class="total-earnings-card">
+            Total GCash Transactions: ₱<span id="filteredTotal">0</span>
+        </div>
+        <a href="../index.html">
+            <i class="fa-solid fa-house"></i>
+        </a>
+    </div>
+
+    <script src="../js/gcash-transactions/gcash-transactions.js"></script>
+</body>
+</html>

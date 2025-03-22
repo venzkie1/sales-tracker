@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soft Drinks Sales</title>
+    <link rel="stylesheet" href="../css/soft-drinks-list.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" href="../assets/images/wallet.png">
+</head>
+<body>
+    <div class="container">
+        <h2>Soft Drinks Sales</h2>
+
+        <!-- Filters -->
+        <div class="filters">
+            <label>Filter by Date:</label>
+            <input type="date" id="filterDate">
+            <label>Category:</label>
+            <select id="filterCategory">
+                <option value="">All</option>
+                <option value="Big">Big</option>
+                <option value="Small">Small</option>
+            </select>
+            <button onclick="applyFilters()">Apply Filters</button>
+            <button onclick="resetFilters()">Reset</button>
+        </div>
+
+        <!-- Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Category</th>
+                    <th>Item</th>
+                    <th>Sold</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="softDrinksList"></tbody>
+        </table>
+        <div class="total-earnings-card">
+            Total Earnings: ₱<span id="totalEarnings">0</span>
+        </div>
+        <a href="../index.html">
+            <i class="fa-solid fa-house"></i>
+        </a>
+    </div>
+
+    <script src="../js/soft-drinks/softdrinks-lists.js"></script>
+</body>
+</html>

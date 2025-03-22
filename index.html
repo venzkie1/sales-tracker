@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="assets/images/wallet.png">
+</head>
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h2>Edit Soft Drink Sale</h2>
+        <label>Category:</label>
+        <select id="editCategory">
+            <option value="Big">Big</option>
+            <option value="Small">Small</option>
+        </select>
+        <br>
+        <label>Item:</label>
+        <select id="editItem">
+            <!-- Options will be populated dynamically -->
+        </select>        
+        <br>
+        <label>Quantity:</label>
+        <input type="number" id="editQuantity">
+        <br>
+        <button onclick="saveEditedRow()">Save Changes</button>
+    </div>
+</div>
+<body>
+    <div class="soft-drinks-container">
+        <h2>Soft Drinks Sales</h2>
+        <label>Category:</label>
+        <select id="category">
+            <option value="Big">Big</option>
+            <option value="Small">Small</option>
+        </select>
+        <label>Item:</label>
+        <select id="item">
+            <option value="Coke">Coke</option>
+            <option value="Royal">Royal</option>
+            <option value="Sprite">Sprite</option>
+        </select>
+        <label>Sold:</label>
+        <input type="number" id="quantity" min="1" value="1">
+        <button onclick="addSoftDrinkSale()">Add Sale</button>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Category</th>
+                        <th>Item</th>
+                        <th>Sold</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="softDrinksTable"></tbody>
+            </table>
+        </div>
+        <div class="total-earnings-card">
+            Total Earnings: ₱<span id="softDrinksTotal">0</span>
+        </div>
+        <div class="links">
+            <a href="pages/soft-drinks-sales.html" id="viewSoftDrinks">View All Sales</a>
+        </div>
+    </div>
+
+    <div class="gcash-container">
+        <h2>GCash Transactions</h2>
+        <label>Amount:</label>
+        <input type="number" id="gcashAmount" min="1">
+        <button onclick="addGCashTransaction()">Add Transaction</button>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Amount</th>
+                        <th>Fee</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="gcashTable"></tbody>
+            </table>
+        </div>
+        <div class="total-earnings-card">
+            Total Transactions: ₱<span id="gcashTotal">0</span>
+        </div>
+        <div class="links">
+            <a href="pages/gcash-transactions.html" id="viewGcashTransactions">View All Transactions</a>
+        </div>
+    </div>
+    
+    <script src="js/softdrinks.js"></script>
+    <script src="js/gcash.js"></script>
+</body>
+</html>
