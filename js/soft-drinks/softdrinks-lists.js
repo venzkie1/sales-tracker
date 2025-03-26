@@ -1,6 +1,13 @@
-function loadSoftDrinks() {
-    const data = JSON.parse(localStorage.getItem('softDrinksData')) || [];
-    displaySoftDrinks(data);
+async function loadSoftDrinks() {
+    try {
+        const response = await fetch('http://localhost:3000/api/softdrinks');
+        if (!response.ok) throw new Error("Failed to fetch data");
+
+        const data = await response.json();
+        displaySoftDrinks(data);
+    } catch (error) {
+        console.error("Error fetching data:", error);
+    }
 }
 
 function displaySoftDrinks(data) {
@@ -25,28 +32,35 @@ function displaySoftDrinks(data) {
     totalEarnings.textContent = total.toFixed(2);
 }
 
-function applyFilters() {
-    const data = JSON.parse(localStorage.getItem('softDrinksData')) || [];
-    const selectedDate = document.getElementById("filterDate").value;
-    const selectedCategory = document.getElementById("filterCategory").value;
+async function applyFilters() {
+    try {
+        const response = await fetch('http://localhost:3000/api/softdrinks');
+        if (!response.ok) throw new Error("Failed to fetch data");
 
-    const filteredData = data.filter(entry => {
-        let matchesDate = true;
-        let matchesCategory = true;
+        const data = await response.json();
+        const selectedDate = document.getElementById("filterDate").value;
+        const selectedCategory = document.getElementById("filterCategory").value;
 
-        if (selectedDate) {
-            let entryDate = new Date(entry.dateTime).toISOString().split('T')[0]; // Converts to YYYY-MM-DD
-            matchesDate = entryDate === selectedDate;
-        }
+        const filteredData = data.filter(entry => {
+            let matchesDate = true;
+            let matchesCategory = true;
 
-        if (selectedCategory) {
-            matchesCategory = entry.category === selectedCategory;
-        }
+            if (selectedDate) {
+                let entryDate = new Date(entry.dateTime).toISOString().split('T')[0]; // Converts to YYYY-MM-DD
+                matchesDate = entryDate === selectedDate;
+            }
 
-        return matchesDate && matchesCategory;
-    });
+            if (selectedCategory) {
+                matchesCategory = entry.category === selectedCategory;
+            }
 
-    displaySoftDrinks(filteredData);
+            return matchesDate && matchesCategory;
+        });
+
+        displaySoftDrinks(filteredData);
+    } catch (error) {
+        console.error("Error fetching data:", error);
+    }
 }
 
 function resetFilters() {

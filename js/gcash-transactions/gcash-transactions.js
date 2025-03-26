@@ -1,21 +1,25 @@
 document.addEventListener("DOMContentLoaded", loadTransactions);
-        
-function loadTransactions() {
-    const savedData = localStorage.getItem("gcashTransactions");
-    if (!savedData) return;
-    
-    const transactions = JSON.parse(savedData);
-    renderTransactions(transactions);
+
+async function loadTransactions() {
+    try {
+        const response = await fetch("http://localhost:3000/api/gcash"); // Fetch data from your backend
+        if (!response.ok) throw new Error("Failed to fetch transactions");
+
+        const transactions = await response.json();
+        renderTransactions(transactions);
+    } catch (error) {
+        console.error("Error loading transactions:", error);
+    }
 }
 
 function renderTransactions(transactions) {
     const table = document.getElementById("gcashTransactionsTable");
     table.innerHTML = "";
     let total = 0;
-    
-    transactions.forEach(({ date, amount, fee, total: transTotal }) => {
+
+    transactions.forEach(({ dateTime, amount, fee, total: transTotal }) => {
         const row = `<tr>
-            <td>${date}</td>
+            <td>${dateTime}</td>
             <td>₱${amount}</td>
             <td>₱${fee}</td>
             <td>₱${transTotal}</td>
@@ -23,29 +27,33 @@ function renderTransactions(transactions) {
         table.innerHTML += row;
         total += parseFloat(transTotal);
     });
-    
+
     document.getElementById("filteredTotal").textContent = total.toFixed(2);
 }
 
-function filterTransactions() {
+async function filterTransactions() {
     const selectedDate = document.getElementById("filterDate").value;
     if (!selectedDate) {
         loadTransactions();
         return;
     }
 
-    const savedData = localStorage.getItem("gcashTransactions");
-    if (!savedData) return;
+    try {
+        const response = await fetch("http://localhost:3000/api/gcash"); // Fetch all transactions
+        if (!response.ok) throw new Error("Failed to fetch transactions");
 
-    const transactions = JSON.parse(savedData);
-    
-    // Ensure the date format matches the input field format (YYYY-MM-DD)
-    const filtered = transactions.filter(({ date }) => {
-        const transactionDate = new Date(date).toISOString().split("T")[0]; // Convert to YYYY-MM-DD
-        return transactionDate === selectedDate;
-    });
+        const transactions = await response.json();
+        
+        // Ensure the date format matches the input field format (YYYY-MM-DD)
+        const filtered = transactions.filter(({ dateTime }) => {
+            const transactionDate = new Date(dateTime).toISOString().split("T")[0]; // Convert to YYYY-MM-DD
+            return transactionDate === selectedDate;
+        });
 
-    renderTransactions(filtered);
+        renderTransactions(filtered);
+    } catch (error) {
+        console.error("Error filtering transactions:", error);
+    }
 }
 
 function resetFilters() {

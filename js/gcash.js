@@ -1,4 +1,4 @@
-function addGCashTransaction() {
+async function addGCashTransaction() {
     const amount = parseFloat(document.getElementById("gcashAmount").value);
     if (isNaN(amount) || amount < 1) {
         alert("Enter a valid amount!");
@@ -9,20 +9,21 @@ function addGCashTransaction() {
     let total = amount + fee;
     const dateTime = new Date().toLocaleString();
 
-    const table = document.getElementById("gcashTable");
-    const row = `<tr>
-        <td>${dateTime}</td>
-        <td>₱${amount}</td>
-        <td>₱${fee}</td>
-        <td>₱${total}</td>
-        <td>
-            <button class="delete-btn" onclick="deleteRow(this)">Delete</button>
-        </td>
-    </tr>`;
-    table.innerHTML += row;
+    const transaction = { dateTime, amount, fee, total };
 
-    saveData();
-    updateGCashTotal();
+    try {
+        const response = await fetch('http://localhost:3000/api/gcash', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(transaction)
+        });
+
+        if (!response.ok) throw new Error("Failed to add transaction");
+
+        loadData(); // Reload data from the database
+    } catch (error) {
+        console.error("Error adding transaction:", error);
+    }
 }
 
 function calculateGCashFee(amount) {
@@ -77,43 +78,55 @@ function saveData() {
     localStorage.setItem("gcashTransactions", JSON.stringify(rows));
 }
 
-function loadData() {
-    const savedData = localStorage.getItem("gcashTransactions");
-    if (!savedData) return;
+async function loadData() {
+    try {
+        const response = await fetch('http://localhost:3000/api/gcash');
+        if (!response.ok) throw new Error("Failed to fetch transactions");
 
-    const transactions = JSON.parse(savedData);
-    const table = document.getElementById("gcashTable");
-    table.innerHTML = "";
+        const transactions = await response.json();
+        const table = document.getElementById("gcashTable");
+        table.innerHTML = "";
 
-    // Get today's date in `M/D/YYYY` format
-    const today = new Date().toLocaleDateString("en-US"); 
+        // Get today's date in `M/D/YYYY` format
+        const today = new Date().toLocaleDateString("en-US"); 
 
-    // Filter transactions to only show today's entries
-    const filteredTransactions = transactions.filter(({ date }) => {
-        let transactionDate = date.split(",")[0]; // Extract `M/D/YYYY`
-        return transactionDate === today;
-    });
+        // Filter transactions to only show today's entries
+        const filteredTransactions = transactions.filter(({ dateTime }) => {
+            let transactionDate = dateTime.split(",")[0]; // Extract `M/D/YYYY`
+            return transactionDate === today;
+        });
 
-    filteredTransactions.forEach(({ date, amount, fee, total }) => {
-        const row = `<tr>
-            <td>${date}</td>
-            <td>₱${amount}</td>
-            <td>₱${fee}</td>
-            <td>₱${total}</td>
-            <td>
-                <button class="delete-btn" onclick="deleteRow(this)">Delete</button>
-            </td>
-        </tr>`;
-        table.innerHTML += row;
-    });
+        filteredTransactions.forEach(({ dateTime, amount, fee, total, _id }) => {
+            const row = `<tr data-id="${_id}">
+                <td>${dateTime}</td>
+                <td>₱${amount}</td>
+                <td>₱${fee}</td>
+                <td>₱${total}</td>
+                <td>
+                    <button class="delete-btn" onclick="deleteRow('${_id}')">Delete</button>
+                </td>
+            </tr>`;
+            table.innerHTML += row;
+        });
 
-    updateGCashTotal();
+        updateGCashTotal();
+    } catch (error) {
+        console.error("Error fetching transactions:", error);
+    }
 }
 
-function deleteRow(button) {
-    button.closest("tr").remove();
-    saveData();
-    updateGCashTotal();
+async function deleteRow(id) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/gcash/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) throw new Error("Failed to delete transaction");
+
+        loadData(); // Reload data after deletion
+    } catch (error) {
+        console.error("Error deleting transaction:", error);
+    }
 }
 
 document.addEventListener("DOMContentLoaded", loadData);

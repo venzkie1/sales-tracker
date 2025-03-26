@@ -1,33 +1,70 @@
-function loadDataSoftDrinks() {
-    const softDrinksData = JSON.parse(localStorage.getItem('softDrinksData')) || [];
-    
-    // Get today's date in YYYY-MM-DD format
-    const today = new Date().toISOString().split("T")[0];
+async function loadDataSoftDrinks() {
+    try {
+        const response = await fetch('http://localhost:3000/api/softdrinks');
+        if (!response.ok) throw new Error('Failed to fetch data');
 
-    // Filter only today's transactions
-    const filteredData = softDrinksData.filter(entry => {
-        const entryDate = new Date(entry.dateTime).toISOString().split("T")[0];
-        return entryDate === today;
-    });
+        const softDrinksData = await response.json();
 
-    rebuildTableSoftDrinks('softDrinksTable', filteredData);
-    updateTotalsSoftDrinks();
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date().toISOString().split("T")[0];
+
+        // Filter only today's transactions
+        const filteredData = softDrinksData.filter(entry => {
+            const entryDate = new Date(entry.dateTime).toISOString().split("T")[0];
+            return entryDate === today;
+        });
+
+        rebuildTableSoftDrinks('softDrinksTable', filteredData);
+        updateTotalsSoftDrinks();
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
 }
 
-function saveDataSoftDrinks() {
-    const softDrinksRows = Array.from(document.querySelectorAll('#softDrinksTable tr'));
-    const softDrinksData = softDrinksRows.map(row => {
+// function saveDataSoftDrinks() {
+//     const softDrinksRows = Array.from(document.querySelectorAll('#softDrinksTable tr'));
+//     const softDrinksData = softDrinksRows.map(row => {
+//         const cells = row.querySelectorAll("td");
+//         if (cells.length < 5) return null; // Ensure all columns exist
+//         return {
+//             dateTime: cells[0].textContent,
+//             category: cells[1].textContent,
+//             item: cells[2].textContent,
+//             quantity: cells[3].textContent,
+//             total: cells[4].textContent.replace('₱', '').trim()
+//         };
+//     }).filter(entry => entry !== null);
+//     localStorage.setItem('softDrinksData', JSON.stringify(softDrinksData));
+// }
+
+async function saveDataSoftDrinks() {
+    const rows = Array.from(document.querySelectorAll('#softDrinksTable tr'));
+    const softDrinksData = rows.map(row => {
         const cells = row.querySelectorAll("td");
         if (cells.length < 5) return null; // Ensure all columns exist
         return {
             dateTime: cells[0].textContent,
             category: cells[1].textContent,
             item: cells[2].textContent,
-            quantity: cells[3].textContent,
-            total: cells[4].textContent.replace('₱', '').trim()
+            quantity: parseInt(cells[3].textContent),
+            total: parseFloat(cells[4].textContent.replace('₱', '').trim())
         };
     }).filter(entry => entry !== null);
-    localStorage.setItem('softDrinksData', JSON.stringify(softDrinksData));
+
+    try {
+        for (const entry of softDrinksData) {
+            const response = await fetch('http://localhost:3000/api/softdrinks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(entry)
+            });
+
+            if (!response.ok) throw new Error('Failed to save entry');
+        }
+        console.log('All data saved successfully!');
+    } catch (error) {
+        console.error('Error saving data:', error);
+    }
 }
 
 function addSoftDrinkSale() {
@@ -131,17 +168,39 @@ function saveEditedRow() {
     }
 }
 
-function deleteRowSoftDrinks(button) {
-    button.parentNode.parentNode.remove();
-    saveDataSoftDrinks();
-    updateTotalsSoftDrinks();
+async function deleteRowSoftDrinks(button) {
+    const row = button.parentNode.parentNode;
+    const id = row.getAttribute('data-id'); // Get _id from row attribute
+
+    if (!id) {
+        console.error("No ID found for deletion");
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/softdrinks/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) throw new Error('Failed to delete entry');
+
+        row.remove(); // Remove from UI only if deletion is successful
+        updateTotalsSoftDrinks();
+        console.log('Entry deleted successfully!');
+    } catch (error) {
+        console.error('Error deleting entry:', error);
+    }
 }
 
 function rebuildTableSoftDrinks(tableId, data) {
     const table = document.getElementById(tableId);
     table.innerHTML = ''; // Clear previous rows
+
     data.forEach(entry => {
-        const row = `<tr>
+        const row = document.createElement("tr");
+        row.setAttribute("data-id", entry._id); // Ensure _id is included
+
+        row.innerHTML = `
             <td>${entry.dateTime}</td>
             <td>${entry.category}</td>
             <td>${entry.item}</td>
@@ -151,8 +210,8 @@ function rebuildTableSoftDrinks(tableId, data) {
                 <button class='action-btn' onclick='editRowSoftDrinks(this)'>Edit</button>
                 <button class='delete-btn' onclick='deleteRowSoftDrinks(this)'>Delete</button>
             </td>
-        </tr>`;
-        table.innerHTML += row;
+        `;
+        table.appendChild(row);
     });
 }
 
